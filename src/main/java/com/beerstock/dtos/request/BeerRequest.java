@@ -1,5 +1,6 @@
 package com.beerstock.dtos.request;
 
+import com.beerstock.entities.Beer;
 import com.beerstock.enums.BeerTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,4 +13,14 @@ public class BeerRequest {
     private int max;
     private int quantity;
     private BeerTypeEnum type;
+
+    public Beer toModel(){
+        return Beer.builder()
+                .name(name)
+                .brand(brand)
+                .max(max)
+                .quantity(quantity)
+                .type(type)
+                .build();
+    }
 }
