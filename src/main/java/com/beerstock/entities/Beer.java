@@ -5,12 +5,14 @@ import com.beerstock.enums.BeerTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 
 @Entity
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Builder
 public class Beer {
