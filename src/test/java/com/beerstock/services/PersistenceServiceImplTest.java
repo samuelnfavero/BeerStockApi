@@ -4,12 +4,11 @@ import com.beerstock.builders.FakeBeer;
 import com.beerstock.dtos.request.BeerRequest;
 import com.beerstock.dtos.response.BeerResponse;
 import com.beerstock.entities.Beer;
-import com.beerstock.excepitons.BeerNameNotFoundException;
+import com.beerstock.excepitons.BeerAlreadyRegisteredException;
+import com.beerstock.excepitons.BeerNotFoundException;
 import com.beerstock.services.repository.PersistenceRepository;
-import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +33,7 @@ public class PersistenceServiceImplTest {
     PersistenceServiceImpl persistenceService;
 
     @Test
-    public void shouldCreateANewBeerWhenTheBeerNotExists(){
+    public void shouldCreateANewBeerWhenTheBeerNotExists() throws BeerAlreadyRegisteredException {
         BeerRequest fakeBeerRequest = FakeBeer.builder().build().toRequest();
         BeerResponse fakeBeerResponse = FakeBeer.builder().build().toResponse();
         Beer fakeBeer = FakeBeer.builder().build().toModel();
@@ -48,9 +47,6 @@ public class PersistenceServiceImplTest {
         assertThat(beerResponse.getMax(), is(equalTo(fakeBeerResponse.getMax())));
         assertThat(beerResponse.getQuantity(), is(equalTo(fakeBeerResponse.getQuantity())));
         assertThat(beerResponse.getType(), is(equalTo(fakeBeerResponse.getType())));
-
-
-
     }
 
     @Test
@@ -58,7 +54,7 @@ public class PersistenceServiceImplTest {
         BeerRequest fakeBeerRequest = FakeBeer.builder().build().toRequest();
         Beer fakeBeer = FakeBeer.builder().build().toModel();
         when(persistenceRepository.findByName(fakeBeerRequest.getName())).thenReturn(Optional.of(fakeBeer));
-        assertThrows(BeerNameNotFoundException.class, () -> persistenceService.save(fakeBeerRequest));
+        assertThrows(BeerNotFoundException.class, () -> persistenceService.save(fakeBeerRequest));
     }
 
     @Test
@@ -71,5 +67,26 @@ public class PersistenceServiceImplTest {
         assertThat(allBeers.get(0).getBrand(), is(equalTo(fakeBeerResponse.getBrand())));
         assertThat(allBeers.get(0).getMax(), is(equalTo(fakeBeerResponse.getMax())));
         assertThat(allBeers.get(0).getQuantity(), is(equalTo(fakeBeerResponse.getQuantity())));
+    }
+
+    @Test
+    public void shouldReturnABeerWhenReceiveAName(){
+        String name = "Brahma";
+        Beer fakeBeer = FakeBeer.builder().build().toModel();
+        when(persistenceRepository.findByName(name)).thenReturn(Optional.of(fakeBeer));
+        BeerResponse beer = persistenceService.findByName(name);
+
+        assertThat(beer.getId(), is(equalTo(fakeBeer.getId())));
+        assertThat(beer.getName(), is(equalTo(fakeBeer.getName())));
+        assertThat(beer.getBrand(), is(equalTo(fakeBeer.getBrand())));
+        assertThat(beer.getMax(), is(equalTo(fakeBeer.getMax())));
+        assertThat(beer.getQuantity(), is(equalTo(fakeBeer.getQuantity())));
+        assertThat(beer.getType().getType(), is(equalTo(fakeBeer.getType().getType())));
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenBeerDoNotExists(){
+        String name = "Brahma";
+        assertThrows(BeerNotFoundException.class, () -> persistenceService.findByName(name));
     }
 }
