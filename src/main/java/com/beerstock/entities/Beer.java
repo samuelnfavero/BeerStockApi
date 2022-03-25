@@ -2,10 +2,7 @@ package com.beerstock.entities;
 
 import com.beerstock.dtos.response.BeerResponse;
 import com.beerstock.enums.BeerTypeEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -14,6 +11,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Setter
 @Builder
 public class Beer {
 

@@ -36,4 +36,10 @@ public class BeerController {
     public List<BeerResponse> list(){
         return persistenceService.list();
     }
+
+    @PutMapping("/{name}/{quantity}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateBeerStock(@PathVariable("name") String name, @PathVariable("quantity") int quantity) throws BeerAlreadyRegisteredException {
+        persistenceService.updateBeerStock(name, quantity);
+    }
 }

@@ -5,6 +5,7 @@ import com.beerstock.dtos.response.BeerResponse;
 import com.beerstock.entities.Beer;
 import com.beerstock.excepitons.BeerAlreadyRegisteredException;
 import com.beerstock.excepitons.BeerNotFoundException;
+import com.beerstock.excepitons.StockMaxCapacityException;
 import com.beerstock.services.repository.PersistenceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,22 @@ public class PersistenceServiceImpl implements PersistenceService {
                 .stream()
                 .map(beer -> beer.toDTO())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void updateBeerStock(String name, int quantity) throws RuntimeException {
+        Beer beer = persistenceRepository.findByName(name)
+                .orElseThrow(() -> new BeerNotFoundException(name));
+        verifyIfTheMaximumStockCapacityDoesNotExceed(beer, quantity);
+        beer.setQuantity(beer.getQuantity() + quantity);
+        persistenceRepository.save(beer);
+    }
+
+    private void verifyIfTheMaximumStockCapacityDoesNotExceed(Beer beer, int quantity) throws StockMaxCapacityException {
+        int maxAllowedQuantity = beer.getMax() - beer.getQuantity();
+        if(quantity > maxAllowedQuantity){
+            throw new StockMaxCapacityException(maxAllowedQuantity);
+        }
     }
 
     private void verifyIfExists(String name) throws BeerAlreadyRegisteredException {
