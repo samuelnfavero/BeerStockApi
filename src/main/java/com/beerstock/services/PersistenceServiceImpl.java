@@ -55,7 +55,8 @@ public class PersistenceServiceImpl implements PersistenceService {
     private void verifyIfTheMaximumStockCapacityDoesNotExceed(Beer beer, int quantity) throws StockMaxCapacityException {
         int maxAllowedQuantity = beer.getMax() - beer.getQuantity();
         if(quantity > maxAllowedQuantity){
-            throw new StockMaxCapacityException(maxAllowedQuantity);
+            int exceededQuantity = quantity - maxAllowedQuantity;
+            throw new StockMaxCapacityException(maxAllowedQuantity, exceededQuantity);
         }
     }
 

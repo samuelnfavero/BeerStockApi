@@ -6,11 +6,14 @@ import com.beerstock.dtos.response.BeerResponse;
 import com.beerstock.entities.Beer;
 import com.beerstock.excepitons.BeerAlreadyRegisteredException;
 import com.beerstock.excepitons.BeerNotFoundException;
+import com.beerstock.excepitons.StockMaxCapacityException;
 import com.beerstock.services.repository.PersistenceRepository;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +28,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PersistenceServiceImplTest {
+
+    @Captor
+    ArgumentCaptor<Beer> beerCaptor;
 
     @Mock
     PersistenceRepository persistenceRepository;
@@ -88,5 +94,38 @@ public class PersistenceServiceImplTest {
     public void shouldThrowAnExceptionWhenBeerDoNotExists(){
         String name = "Brahma";
         assertThrows(BeerNotFoundException.class, () -> persistenceService.findByName(name));
+    }
+
+    @Test
+    public void shouldUpdateTheQuantityWhenValidationsSuceed(){
+        Beer originalFakeBeer = FakeBeer.builder().build().toModel();
+        Beer updatedFakeBeer = FakeBeer.builder().build().toModel();
+        int quantity = 20;
+
+        when(persistenceRepository.findByName(any())).thenReturn(Optional.of(updatedFakeBeer));
+        persistenceService.updateBeerStock(updatedFakeBeer.getName(), quantity);
+        assertThat(updatedFakeBeer.getQuantity(), is(equalTo(originalFakeBeer.getQuantity() + quantity)));
+    }
+
+    @Test
+    public void shouldThrowsAnExceptionWhenTheBeerDoNotExists(){
+        String fakeMessage = "Cerveja de nome Brahma não encontrada";
+        String beerName = "Brahma";
+        int quantity = 20;
+
+        Exception errorMessage = assertThrows(BeerNotFoundException.class, () -> persistenceService.updateBeerStock(beerName, quantity));
+        assertThat(errorMessage.getMessage(), is(equalTo(fakeMessage)));
+    }
+
+    @Test
+    public void shouldThrowsAnExceptionWhenExceedThaMaxQuantityOfBeers(){
+        String fakeMessage = "Quantidade máxima do estoque excedida em 5. O valor máximo a ser inserido é de 20.";
+        Beer fakeBeer = FakeBeer.builder().build().toModel();
+        int quantity = 25;
+
+        when(persistenceRepository.findByName(any())).thenReturn(Optional.of(fakeBeer));
+        Exception errorMessage = assertThrows(StockMaxCapacityException.class,
+                () -> persistenceService.updateBeerStock(fakeBeer.getName(), quantity));
+        assertThat(errorMessage.getMessage(), is(equalTo(fakeMessage)));
     }
 }
