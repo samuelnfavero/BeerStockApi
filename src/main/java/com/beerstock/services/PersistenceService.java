@@ -15,4 +15,6 @@ public interface PersistenceService {
     BeerResponse findByName(String name);
 
     void updateBeerStock(String name, int quantity) throws BeerAlreadyRegisteredException, StockMaxCapacityException;
+
+    void delete(Long id) throws BeerAlreadyRegisteredException;
 }

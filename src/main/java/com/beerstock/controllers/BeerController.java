@@ -42,4 +42,10 @@ public class BeerController {
     public void updateBeerStock(@PathVariable("name") String name, @PathVariable("quantity") int quantity) throws BeerAlreadyRegisteredException {
         persistenceService.updateBeerStock(name, quantity);
     }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public void delete(@PathVariable("id") Long id) throws BeerAlreadyRegisteredException {
+        persistenceService.delete(id);
+    }
 }

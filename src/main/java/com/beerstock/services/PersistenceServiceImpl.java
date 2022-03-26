@@ -52,6 +52,13 @@ public class PersistenceServiceImpl implements PersistenceService {
         persistenceRepository.save(beer);
     }
 
+    @Override
+    public void delete(Long id) {
+        persistenceRepository.findById(id)
+                .orElseThrow(() -> new BeerNotFoundException(id));
+        persistenceRepository.deleteById(id);
+    }
+
     private void verifyIfTheMaximumStockCapacityDoesNotExceed(Beer beer, int quantity) throws StockMaxCapacityException {
         int maxAllowedQuantity = beer.getMax() - beer.getQuantity();
         if(quantity > maxAllowedQuantity){
@@ -66,4 +73,5 @@ public class PersistenceServiceImpl implements PersistenceService {
             throw new BeerAlreadyRegisteredException(beer.get().getName());
         }
     }
+
 }

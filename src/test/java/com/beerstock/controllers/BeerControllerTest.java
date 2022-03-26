@@ -6,37 +6,27 @@ import com.beerstock.dtos.response.BeerResponse;
 import com.beerstock.entities.Beer;
 import com.beerstock.services.PersistenceService;
 import com.beerstock.services.repository.PersistenceRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.Before;
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-
-import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -106,7 +96,7 @@ public class BeerControllerTest {
     }
 
     @Test
-    public void shouldReturnABeerWhenReceiveAName() throws Exception {
+    public void shouldReturnABeerWhenReceiveAName() throws Exception { //NÃO FUNCIONA. ESTÁ IGNORANDO O COMANDO WHEN
         BeerResponse fakeBeerResponse = FakeBeer.builder().build().toResponse();
         Beer fakeBeer = FakeBeer.builder().build().toModel();
         String jsonBeer = mapper.writeValueAsString(fakeBeerResponse);
@@ -119,5 +109,18 @@ public class BeerControllerTest {
 
         )
                 .andExpect(status().isFound());
+    }
+
+    @Test
+    public void shouldReturnaHttpStatusOKWhenReceiveAPutHttpRequest() throws Exception {//MESMO ERRO DE CIMA
+        Beer fakeBeer = FakeBeer.builder().build().toModel();
+        int quantity = 20;
+
+        when(persistenceRepository.findByName(any())).thenReturn(Optional.of(fakeBeer));
+
+        mockMvc.perform(
+                put("/beerstock/" + fakeBeer.getName() + "/" + quantity)
+        )
+                .andExpect(status().isOk());
     }
 }

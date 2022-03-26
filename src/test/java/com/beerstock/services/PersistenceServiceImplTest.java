@@ -128,4 +128,26 @@ public class PersistenceServiceImplTest {
                 () -> persistenceService.updateBeerStock(fakeBeer.getName(), quantity));
         assertThat(errorMessage.getMessage(), is(equalTo(fakeMessage)));
     }
+
+    @Test
+    public void shouldDeleteWhentheBeerExists(){
+        Beer fakeBeer = FakeBeer.builder().build().toModel();
+
+        when(persistenceRepository.findById(fakeBeer.getId())).thenReturn(Optional.of(fakeBeer));
+        doNothing().when(persistenceRepository).deleteById(fakeBeer.getId());
+
+        persistenceService.delete(fakeBeer.getId());
+
+        verify(persistenceRepository, times(1)).findById(fakeBeer.getId());
+        verify(persistenceRepository, times(1)).deleteById(fakeBeer.getId());
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenTheBeerDoesNotExist(){
+        Long id = 1L;
+        String expectedMessage = "Cerveja com ID 1 não encontrada";
+        Exception errorMessage = assertThrows(BeerNotFoundException.class,() -> persistenceService.delete(id));
+
+        assertThat(errorMessage.getMessage(), is(equalTo(expectedMessage)));
+    }
 }
